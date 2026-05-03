@@ -4,9 +4,18 @@ import { useCallback } from 'react';
 import { uploadFile } from './api/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from './store/useStore';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getUploads } from './api/client';
+import OpsView from './pages/OpsView';
+import LeadershipView from './pages/LeadershipView';
+
+
+
+
 
 function UploadScreen() {
-  const { setActiveUploadId, showToast } = useStore();
+  const { setActiveUploadId } = useStore();
   const queryClient = useQueryClient();
 
   const { mutate: doUpload, isPending } = useMutation({
@@ -15,11 +24,12 @@ function UploadScreen() {
       setActiveUploadId(data.uploadId);
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
-      showToast(`✓ ${data.recordCount} delay events loaded`);
+      queryClient.invalidateQueries({ queryKey: ['delays'] });
     },
-    onError: (e) => showToast(e.message, 'error'),
+    onError: (e) => (e.message, 'error'),
   });
-
+  
+  
   const onDrop = useCallback((files: File[]) => { if (files[0]) doUpload(files[0]); }, [doUpload]);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -42,13 +52,30 @@ function UploadScreen() {
 
 export default function App() {
   
+  const { mode, setUploads, uploads } = useStore();
+
+  const { data } = useQuery({
+    queryKey: ['uploads'],
+    queryFn: getUploads,
+    refetchInterval: 15_000,
+  });
+
+  useEffect(() => { if (data) setUploads(data); }, [data, setUploads]);
+
+  const hasData = (uploads?.length ?? 0) > 0;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-bg">
       <Topbar />
       <div className="flex-1 overflow-hidden">
-        <UploadScreen />
-        
+        {!hasData ? (
+          <UploadScreen />
+        ) : (
+          <>
+            {mode === 'ops'       && <OpsView /> && <UploadScreen /> }
+            {mode === 'leadership' && <LeadershipView />}
+          </>
+        )}
       </div>
       
     </div>
