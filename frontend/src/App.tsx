@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getUploads } from './api/client';
 import OpsView from './pages/OpsView';
 import LeadershipView from './pages/LeadershipView';
+import Toast from './components/Toast';
 
 
 
@@ -72,12 +73,12 @@ export default function App() {
           <UploadScreen />
         ) : (
           <>
-            {mode === 'ops'       && <OpsView /> && <UploadScreen /> }
+            {mode === 'ops'       && <OpsView />}
             {mode === 'leadership' && <LeadershipView />}
           </>
         )}
       </div>
-      
+      <Toast />
     </div>
   );
 }

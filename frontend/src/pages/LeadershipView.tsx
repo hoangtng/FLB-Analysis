@@ -1,7 +1,10 @@
+
+
+
 export default function LeadershipView() {
-
-
-    return (
-        <p>nothing here yet</p>
-    );
+  return (
+      <p>
+        nothing here yet
+      </p>
+  )
 }

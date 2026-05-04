@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { StatsResponse, DelayRecord, UploadRecord, CodeStat, MonthStat } from '../types';
+import type { StatsResponse, DelayRecord, UploadRecord, CodeStat, MonthStat, AlertRecord } from '../types';
 
 const api = axios.create({ baseURL: 'http://localhost:4000/api' });
 
@@ -33,3 +33,9 @@ export const generateAnomalySummary = async (anomalies: unknown[]): Promise<stri
 
 export const sendAlert = async (payload: { team: string; message: string; codes: string[] }) =>
   (await api.post('/alerts', payload)).data;
+
+export const getMonths = async (uploadId?: string): Promise<string[]> =>
+  (await api.get('/delays/months', { params: uploadId ? { uploadId } : {} })).data;
+
+export const getAlerts = async (): Promise<AlertRecord[]> =>
+  (await api.get('/alerts')).data;

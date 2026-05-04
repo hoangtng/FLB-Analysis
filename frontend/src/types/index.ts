@@ -58,8 +58,21 @@ export interface UploadRecord {
 export type AppMode = 'ops' | 'leadership';
 
 export interface DelayFilters {
-  origin: string;
-  cat: string;
+  origin:     string;
+  cat:        string;
   chargeable: string;
-  search: string;
+  search:     string;
+  from:       string;
+  to:         string;
+  month:      string;
+  week:       string;
 }
+
+export interface AlertRecord {
+  _id:    string;
+  team:   string;
+  message:string;
+  codes:  string[];
+  sentAt: string;
+}
+

@@ -2,8 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './db/conn';
 import cors from 'cors';
-import uploadRoutes   from './routes/upload';
-
+import uploadRoutes from './routes/upload';
+import delayRoutes from './routes/delays';
 
 
 
@@ -27,7 +27,7 @@ app.use(cors({ origin: 'http://localhost:5173' }));
 
 // handling api URLs
 app.use('/api/upload',    uploadRoutes);
-
+app.use('/api/delays',    delayRoutes);
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 

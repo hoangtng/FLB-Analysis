@@ -12,8 +12,12 @@ interface AppStore {
   setUploads: (u: UploadRecord[]) => void;
 
   filters: DelayFilters;
-  setFilter: (key: keyof DelayFilters, value: string) => void;
-  resetFilters: () => void;
+  setFilter:      (key: keyof DelayFilters, value: string) => void;
+  setMonthFilter: (month: string) => void;   // ← NEW: sets month + clears week
+  setWeekFilter:  (week: string)  => void;   // ← NEW: sets week
+  setQuickRange:  (from: string, to: string) => void; // ← NEW: sets custom range
+  resetFilters:   () => void;
+
 
   drillCode: string | null;
   setDrillCode: (code: string | null) => void;
@@ -26,7 +30,17 @@ interface AppStore {
   showToast: (message: string, type?: 'success' | 'error') => void;
 }
 
-const defaultFilters: DelayFilters = { origin: '', cat: '', chargeable: '', search: '' };
+const defaultFilters: DelayFilters = {
+  origin:     '',
+  cat:        '',
+  chargeable: '',
+  search:     '',
+  from:       '',
+  to:         '',
+  month:      '',
+  week:       '',
+};
+
 
 export const useStore = create<AppStore>((set) => ({
   mode: 'ops',
@@ -38,8 +52,42 @@ export const useStore = create<AppStore>((set) => ({
   uploads: [],
   setUploads: (uploads) => set({ uploads }),
 
-  filters: defaultFilters,
-  setFilter: (key, value) => set((s) => ({ filters: { ...s.filters, [key]: value } })),
+   filters: defaultFilters,
+
+  // Generic single-field update
+  setFilter: (key, value) =>
+    set((s) => ({ filters: { ...s.filters, [key]: value } })),
+
+  // Set month — atomically clears week + custom range in same update
+  setMonthFilter: (month) =>
+    set((s) => ({
+      filters: {
+        ...s.filters,
+        month,
+        week: '',   // clear week when month changes
+        from: '',   // clear custom range when month is selected
+        to:   '',
+      },
+    })),
+
+  // Set week — only valid within a selected month
+  setWeekFilter: (week) =>
+    set((s) => ({
+      filters: { ...s.filters, week },
+    })),
+
+  // Set a custom date range — clears month + week
+  setQuickRange: (from, to) =>
+    set((s) => ({
+      filters: {
+        ...s.filters,
+        from,
+        to,
+        month: '',  // clear month when custom range is selected
+        week:  '',
+      },
+    })),
+
   resetFilters: () => set({ filters: defaultFilters }),
 
   drillCode: null,

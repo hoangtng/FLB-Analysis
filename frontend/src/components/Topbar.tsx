@@ -7,7 +7,7 @@ import { UploadCloud } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function Topbar() {
-  const { mode, setMode, setActiveUploadId } = useStore();
+  const { mode, setMode, setActiveUploadId, showToast } = useStore();
   const queryClient = useQueryClient();
 
   const { mutate: doUpload, isPending } = useMutation({
@@ -17,8 +17,9 @@ export default function Topbar() {
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
       queryClient.invalidateQueries({ queryKey: ['delays'] });
+      showToast(`✓ Loaded ${data.recordCount} delay events from ${data.flightCount} flights`);
     },
-    onError: (e) => (e.message, 'error'),
+    onError: (e) => showToast(e.message, 'error'),
   });
 
   const onDrop = useCallback((files: File[]) => { if (files[0]) doUpload(files[0]); }, [doUpload]);
