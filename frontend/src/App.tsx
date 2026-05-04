@@ -16,18 +16,23 @@ import Toast from './components/Toast';
 
 
 function UploadScreen() {
-  const { setActiveUploadId } = useStore();
+  const { setActiveUploadId, showToast } = useStore();
   const queryClient = useQueryClient();
 
   const { mutate: doUpload, isPending } = useMutation({
     mutationFn: uploadFile,
     onSuccess: (data) => {
+      console.log('Upload success, uploadId:', data.uploadId);
       setActiveUploadId(data.uploadId);
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
+      queryClient.invalidateQueries({ queryKey: ['stats-full'] });
+      queryClient.invalidateQueries({ queryKey: ['stats-filtered'] });
       queryClient.invalidateQueries({ queryKey: ['delays'] });
+      showToast(`✓ ${data.recordCount} delay events loaded`);
+
     },
-    onError: (e) => (e.message, 'error'),
+    onError: (e) => showToast(e.message, 'error'),
   });
   
   
@@ -53,7 +58,8 @@ function UploadScreen() {
 
 export default function App() {
   
-  const { mode, setUploads, uploads } = useStore();
+  const { mode, setUploads, uploads, activeUploadId,
+    setActiveUploadId } = useStore();
 
   const { data } = useQuery({
     queryKey: ['uploads'],
@@ -61,7 +67,19 @@ export default function App() {
     refetchInterval: 15_000,
   });
 
-  useEffect(() => { if (data) setUploads(data); }, [data, setUploads]);
+  useEffect(() => {
+    if (!data) return;
+
+    // Sync uploads list into store
+    setUploads(data);
+
+    // automatically use the most recent upload
+    if (data.length > 0 && !activeUploadId) {
+      const mostRecent = data[0]; // already sorted by uploadedAt desc
+      console.log('Auto-setting activeUploadId:', mostRecent._id);
+      setActiveUploadId(mostRecent._id);
+    }
+  }, [data, setUploads, activeUploadId, setActiveUploadId]);
 
   const hasData = (uploads?.length ?? 0) > 0;
 
