@@ -89,3 +89,54 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 Drop your FLB Excel file (`.xlsx`) onto the upload screen. The app will parse it and populate the dashboard.
 
 ---
+
+## MongoDB Collections
+
+| Collection | Purpose |
+|---|---|
+| `Delay` | Every parsed delay event — code, minutes, reason, date, station, hour |
+| `Upload` | Upload history — filename, record count, date range, status |
+| `AISummary` | Cached GPT-4o analyses with 1-hour TTL |
+| `Alert` | Log of every team alert sent with timestamp and codes |
+
+---
+
+## API Reference
+
+### Upload
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/upload` | Upload and parse an Excel or CSV file |
+| `GET` | `/api/upload` | List recent uploads |
+| `DELETE` | `/api/upload/:id` | Delete an upload and all its delay records |
+
+### Delays
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/delays` | Paginated, filtered delay records |
+| `GET` | `/api/delays/stats` | Aggregated stats (by code, month, hour, category) |
+| `GET` | `/api/delays/origins` | Distinct station list |
+| `GET` | `/api/delays/months` | Distinct months in the dataset |
+
+### AI Summaries
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/summaries/trend` | Generate full trend analysis |
+
+The system check MongoDB for a cached result before calling OpenAI to savings tokens. Results are cached for 1 hour.
+
+### Alerts
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/alerts` | Save a new team alert |
+| `GET` | `/api/alerts` | Fetch recent alert history |
+
+---
+
+## License
+
+MIT
