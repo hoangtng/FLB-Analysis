@@ -44,7 +44,7 @@ Create a `.env` file in the `backend/` folder:
 ```bash
 # backend/.env
 OPENAI_API_KEY=sk-your-key-here
-MONGO_URI=mongodb://localhost:27017/flbops
+MONGO_URI=mongodb://localhost:27017/flb-mongo
 PORT=4000
 ```
 
