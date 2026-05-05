@@ -5,13 +5,12 @@ import cors from 'cors';
 import uploadRoutes from './routes/upload';
 import delayRoutes from './routes/delays';
 import alertRoutes from './routes/alerts';
+import summariesRoutes from './routes/summaries';
 
 
 
-dotenv.config({ path: '../../.env' });
-
-
-
+//dotenv.config({ path: './.env' });
+dotenv.config();
 const app  = express();
 const PORT = process.env.PORT || 4000;
 
@@ -29,7 +28,8 @@ app.use(cors({ origin: 'http://localhost:5173' }));
 // handling api URLs
 app.use('/api/upload',    uploadRoutes);
 app.use('/api/delays',    delayRoutes);
-app.use('/api/alerts',    alertRoutes); 
+app.use('/api/alerts',    alertRoutes);
+app.use('/api/summaries',  summariesRoutes);
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 

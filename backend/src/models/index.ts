@@ -81,3 +81,27 @@ const AlertSchema = new Schema<IAlert>({
 });
 
 export const Alert = mongoose.model<IAlert>('Alert', AlertSchema);
+
+// AI Summary information
+
+export interface IAISummary extends Document {
+    uploadId: mongoose.Types.ObjectId;
+    type: 'trend' | 'code' | 'anomaly' | 'daily';
+    scope: string;
+    content: string;
+    generatedAt: Date;
+    tokensUsed: number;
+}
+
+const AISummarySchema = new Schema<IAISummary>({
+    uploadId: { type: Schema.Types.ObjectId, ref: 'Upload', require: true },
+    type: { type: String, enum: ['trend', 'code', 'anomaly', 'daily'], default: 'trend', required: true},
+    scope: { type: String, required: true },
+    content: { type: String, required: true },
+    generatedAt: { type: Date, default: Date.now },
+    tokensUsed: { type: Number, default: 0},
+});
+
+AISummarySchema.index({ type: 1, scope: 1 });
+
+export const AISummary = mongoose.model<IAISummary>('AISummary', AISummarySchema);

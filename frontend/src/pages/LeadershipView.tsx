@@ -1,10 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
-import { getStats } from "../api/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useStore } from "../store/useStore";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { Loader2, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
+import { getStats, generateTrendAnalysis } from '../api/client';
 import { Bar, CartesianGrid, LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart } from "recharts";
 import { CAT_COLORS } from "../utils/constants";
 import clsx from "clsx";
+import { useState } from "react";
+
+function formatMarkdown(text: string) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
+
 
 const TOOLTIP_STYLE = {
       contentStyle: { background: '#141820', border: '1px solid #1f2535', borderRadius: 6, fontSize: 11, fontFamily: 'IBM Plex Mono' },
@@ -15,6 +24,8 @@ const TOOLTIP_STYLE = {
 export default function LeadershipView() {
   
   const { activeUploadId } = useStore();
+  const [trendAnalysis, setTrendAnalysis] = useState<string | null>(null);
+  
 
  const { data: stats } = useQuery({
     queryKey: ['stats', activeUploadId],
@@ -36,6 +47,14 @@ export default function LeadershipView() {
   const chargeRate  = summary ? Math.round((summary.chargeableCount / summary.totalEvents) * 100) : 0;
   const amazonCount = byCat.find(c => c.cat === 'amazon')?.count ?? 0;
   const amazonPct   = summary ? Math.round((amazonCount / summary.totalEvents) * 100) : 0;
+
+  const { mutate: doTrend, isPending: trendLoading } = useMutation ({
+      mutationFn: () => generateTrendAnalysis(stats!.byMonth, stats!.byCode, activeUploadId ?? undefined),
+      onSuccess: setTrendAnalysis,
+      onError: () => setTrendAnalysis('Analysis Unavailable - check your OpenAI API.'),
+  });
+
+
 
 
   const Delta = ({ pct }: { pct: number }) =>
@@ -132,6 +151,44 @@ export default function LeadershipView() {
                 );
               })}
             </div>
+          </div>
+
+          {/* ── AI Trend Analysis ── */}
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Sparkles size={14} className="text-amber" />
+                <span className="mono-label">AI Trend Analysis — GPT-4o</span>
+              </div>
+              {!trendAnalysis && !trendLoading && stats && (
+                <button className="btn-primary text-[10px] px-4 py-1.5" onClick={() => doTrend()}>
+                  Generate Analysis
+                </button>
+              )}
+              {trendAnalysis && (
+                <button className="btn-ghost text-[9px] px-3 py-1.5" onClick={() => setTrendAnalysis(null)}>
+                  Regenerate
+                </button>
+              )}
+            </div>
+
+            {trendLoading && (
+              <div className="flex items-center gap-3 text-muted text-sm py-4">
+                <Loader2 size={14} className="animate-spin text-amber" />
+                <span>Analyzing {stats?.byMonth.length} months of data with GPT-4o…</span>
+              </div>
+            )}
+
+            {trendAnalysis && !trendLoading && (
+              <div className="prose-ai"
+                dangerouslySetInnerHTML={{ __html: `<p>${formatMarkdown(trendAnalysis)}</p>` }} />
+            )}
+
+            {!trendAnalysis && !trendLoading && (
+              <p className="text-sm text-muted py-2">
+                Click "Generate Analysis" to get a GPT-4o powered summary with root causes and recommendations.
+              </p>
+            )}
           </div>
 
 
