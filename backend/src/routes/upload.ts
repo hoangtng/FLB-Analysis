@@ -63,8 +63,20 @@ router.post('/', upload.single('file'), async (req, res) => {
 
             const depRaw = row['ACTUAL_DEPARTURE_TIME_LOCAL'];
             let hour: number | null = null;
-            if (depRaw instanceof Date) hour = depRaw.getHours();
-            else if (typeof depRaw === 'number') hour = Math.floor((depRaw % 1) * 24);
+            if (depRaw instanceof Date) {
+                hour = depRaw.getHours();
+            }
+            else if (typeof depRaw === 'number') {
+                hour = Math.floor((depRaw % 1) * 24);
+            }
+            else if (typeof depRaw === 'string' && depRaw.trim()) {
+                // Handle "HH:MM" or "HH:MM:SS" string format
+                const parts = depRaw.trim().split(':');
+                const parsed = parseInt(parts[0], 10);
+                if (!isNaN(parsed) && parsed >= 0 && parsed <= 23) {
+                    hour = parsed;
+                }
+            }
 
             // Get flight delay code
             // Note: Each flight row in the Excel file 

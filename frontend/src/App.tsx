@@ -10,6 +10,8 @@ import { getUploads } from './api/client';
 import OpsView from './pages/OpsView';
 import LeadershipView from './pages/LeadershipView';
 import Toast from './components/Toast';
+import AlertModal from './components/AlertModal';
+import AlertHistory from './components/AlertHistory';
 
 
 
@@ -96,6 +98,8 @@ export default function App() {
           </>
         )}
       </div>
+      <AlertModal />
+      <AlertHistory />
       <Toast />
     </div>
   );

@@ -66,11 +66,23 @@ router.get('/', async (req, res) => {
     console.log('GET /api/delays — query:', query);
 
     const sortObj: Record<string, 1 | -1> = { [sort]: dir === 'asc' ? 1 : -1 };
-    const docs = await Delay.find(filter).sort(sortObj).limit(parseInt(limit));
-    const total = await Delay.countDocuments(filter);
+    const limitNum = Math.min(500, Math.max(1, parseInt(limit) || 100));
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const skip = (pageNum - 1) * limitNum;
+
+    const [docs, total] = await Promise.all([
+      Delay.find(filter).sort(sortObj).skip(skip).limit(limitNum),
+      Delay.countDocuments(filter),
+    ]);
     console.log(`GET /api/delays — found ${total} total, returning ${docs.length}`);
-    res.json({ total, data: docs });
+    return res.json({
+      total,
+      page:  pageNum,
+      limit: limitNum,
+      data:  docs,
+    });
   } catch (err) {
+    console.error('GET /delays error:', err);
     res.status(500).json({ error: String(err) });
   }
 });
@@ -106,7 +118,7 @@ router.get('/stats', async (req, res) => {
             avgMinutes:      { $avg: '$minutes' },
             chargeableCount: {
               $sum: {
-                $cond: [{ $eq: ['$chargeable', 'Yes'] }, 1, 0],
+                $cond: [{ $eq: ['$chargeable', 'Yes'] }, 1, 0]
               },
             },
           },
@@ -240,4 +252,23 @@ router.get('/origins', async (req, res) => {
   }
 });
 
+//  GET /api/delays/months
+//  Return months for the month filter dropdown in opview
+
+router.get('/months', async (req, res) => {
+    try {
+      const {uploadId} = req.query as Record<string, string>;
+      const filter: Record<string, unknown> = {};
+      if (uploadId) filter.uploadId = uploadId;
+
+      const months = await Delay.distinct('month', filter);
+
+      return res.json(months.filter(Boolean).sort());
+
+    }
+    catch (err) {
+      console.error('GET /api/delays/months error: ', err);
+      return res.status(500).json({error: String(err)});
+    }
+});
 export default router;

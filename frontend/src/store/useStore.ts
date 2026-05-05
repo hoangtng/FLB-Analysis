@@ -10,6 +10,9 @@ interface AppStore {
 
   uploads: UploadRecord[];
   setUploads: (u: UploadRecord[]) => void;
+  
+  page: number;
+  setPage: (page: number) => void;
 
   filters: DelayFilters;
   setFilter:      (key: keyof DelayFilters, value: string) => void;
@@ -51,6 +54,9 @@ export const useStore = create<AppStore>((set) => ({
 
   uploads: [],
   setUploads: (uploads) => set({ uploads }),
+
+  page:    1,
+      setPage: (page) => set({ page }),
 
    filters: defaultFilters,
 

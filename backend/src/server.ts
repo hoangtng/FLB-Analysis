@@ -4,6 +4,7 @@ import connectDB from './db/conn';
 import cors from 'cors';
 import uploadRoutes from './routes/upload';
 import delayRoutes from './routes/delays';
+import alertRoutes from './routes/alerts';
 
 
 
@@ -28,6 +29,7 @@ app.use(cors({ origin: 'http://localhost:5173' }));
 // handling api URLs
 app.use('/api/upload',    uploadRoutes);
 app.use('/api/delays',    delayRoutes);
+app.use('/api/alerts',    alertRoutes); 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 
