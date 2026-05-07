@@ -1,7 +1,9 @@
 import axios from 'axios';
 import type { StatsResponse, DelayRecord, UploadRecord, CodeStat, MonthStat, AlertRecord } from '../types';
 
-const api = axios.create({ baseURL: 'http://localhost:4000/api' });
+const BASE = import.meta.env.VITE_API_URL ?? '';
+const api  = axios.create({ baseURL: `${BASE}/api` });
+
 
 export const uploadFile = async (file: File) => {
   const form = new FormData();
