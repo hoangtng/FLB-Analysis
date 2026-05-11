@@ -6,6 +6,30 @@ The system ingests raw Excel flight data, stores it in MongoDB, and provides two
 
 ---
 
+## Why This Project Matters
+
+Airline delay data is often stored in raw spreadsheet format, making it difficult for operations teams to quickly identify delay patterns, high-impact categories, and root causes. This platform converts raw flight-delay records into searchable data, visual dashboards, and AI-generated operational summaries.
+
+## Key Features
+
+- Excel/CSV flight-delay upload and parsing
+- MongoDB-backed delay record storage
+- Operations dashboard for daily monitoring
+- Leadership dashboard for trend analysis
+- Aggregated statistics by delay code, category, month, hour, and station
+- GPT-4o root-cause analysis for operational delay text
+- Cache-aside strategy to reduce duplicate AI API calls
+- Dockerized frontend, backend, and database setup
+- Production deployment with Render and MongoDB Atlas
+
+## Technical Highlights
+
+- Designed REST API endpoints with Node.js, Express.js, and TypeScript
+- Built MongoDB aggregation pipelines for analytics queries
+- Used React Query and Zustand for frontend state and data fetching
+- Integrated Recharts for dashboard visualizations
+- Used Docker Compose for local development
+- Added environment-based configuration for deployment
 ## Tech Stack
 
 | Layer | Technology |
